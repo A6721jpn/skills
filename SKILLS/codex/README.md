@@ -4,4 +4,4 @@ Store Codex-targeted skills here.
 
 Path format:
 
-- `skills/codex/<skill-name>/SKILL.md`
+- `SKILLS/codex/<skill-name>/SKILL.md`

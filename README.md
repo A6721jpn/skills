@@ -4,8 +4,9 @@ Repository for creating and storing reusable SKILLS for Codex and Gemini.
 
 ## Directory structure
 
-- `skills/codex/<skill-name>/SKILL.md`
-- `skills/gemini/<skill-name>/SKILL.md`
+- `SKILLS/codex/<skill-name>/SKILL.md`
+- `SKILLS/gemini/<skill-name>/SKILL.md`
+- `WORKFLOW/<workflow-name>.md`
 - `templates/SKILL.md`
 
 ## Quick start
@@ -18,8 +19,8 @@ Repository for creating and storing reusable SKILLS for Codex and Gemini.
 Example:
 
 ```bash
-mkdir -p skills/codex/my-skill
-cp templates/SKILL.md skills/codex/my-skill/SKILL.md
+mkdir -p SKILLS/codex/my-skill
+cp templates/SKILL.md SKILLS/codex/my-skill/SKILL.md
 ```
 
 ## Naming convention
