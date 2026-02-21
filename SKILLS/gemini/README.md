@@ -4,4 +4,4 @@ Store Gemini-targeted skills here.
 
 Path format:
 
-- `skills/gemini/<skill-name>/SKILL.md`
+- `SKILLS/gemini/<skill-name>/SKILL.md`
