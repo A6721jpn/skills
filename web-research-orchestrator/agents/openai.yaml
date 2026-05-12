@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web Research Orchestrator"
+  short_description: "Structured web research with sourced HTML reports"
+  default_prompt: "Research this topic using web sources, multimedia when useful, and produce a concise sourced HTML report."

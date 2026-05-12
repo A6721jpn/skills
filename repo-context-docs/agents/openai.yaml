@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo Context Docs"
+  short_description: "Create LLM-friendly repository documentation"
+  default_prompt: "Document this repository so a no-context coding agent can understand the current architecture, decisions, and implementation entry points without reading unnecessary history."
