@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain Repo Context Docs"
+  short_description: "Refresh LLM-friendly repository docs after development drift"
+  default_prompt: "Re-evaluate this repository documentation after recent development, identify stale or conflicting context for no-context coding agents, and patch the smallest responsible docs."
