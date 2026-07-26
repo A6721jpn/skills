@@ -1,0 +1,4 @@
+interface:
+  display_name: "Semantic Generation"
+  short_description: "指示対象を固定して一貫性ある文章と識別子を生成する"
+  default_prompt: "Use $semantic-generation to define referents before drafting this document."
