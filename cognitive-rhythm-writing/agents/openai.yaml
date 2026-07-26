@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cognitive Rhythm Writing"
+  short_description: "説明文に認知リズムと読み進める推進力を無理なく設計する"
+  default_prompt: "Use $cognitive-rhythm-writing to make this Japanese explanation engaging without inventing content."
