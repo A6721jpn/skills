@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "profile_id": "upper-frame-bottom-datum-v1-historical-success-20260824",
+  "historical_fusion_version": "2704.1.36",
+  "known_root_unhealthy_features": [
+    {
+      "index": 48,
+      "name": "押し出し3",
+      "object_type": "adsk::fusion::ExtrudeFeature",
+      "health_state": 3,
+      "error_or_warning_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "is_suppressed": false,
+      "timeline_index": null,
+      "timeline_is_suppressed": true,
+      "timeline_name": "押し出し3"
+    },
+    {
+      "index": 49,
+      "name": "フィレット2",
+      "object_type": "adsk::fusion::FilletFeature",
+      "health_state": 3,
+      "error_or_warning_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "is_suppressed": false,
+      "timeline_index": null,
+      "timeline_is_suppressed": true,
+      "timeline_name": "フィレット2"
+    },
+    {
+      "index": 50,
+      "name": "ミラー2",
+      "object_type": "adsk::fusion::MirrorFeature",
+      "health_state": 3,
+      "error_or_warning_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "is_suppressed": false,
+      "timeline_index": null,
+      "timeline_is_suppressed": true,
+      "timeline_name": "ミラー2"
+    },
+    {
+      "index": 51,
+      "name": "結合4",
+      "object_type": "adsk::fusion::CombineFeature",
+      "health_state": 3,
+      "error_or_warning_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "is_suppressed": false,
+      "timeline_index": null,
+      "timeline_is_suppressed": true,
+      "timeline_name": "結合4"
+    },
+    {
+      "index": 52,
+      "name": "フィレット3",
+      "object_type": "adsk::fusion::FilletFeature",
+      "health_state": 3,
+      "error_or_warning_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "is_suppressed": false,
+      "timeline_index": null,
+      "timeline_is_suppressed": true,
+      "timeline_name": "フィレット3"
+    },
+    {
+      "index": 53,
+      "name": "面取り2",
+      "object_type": "adsk::fusion::ChamferFeature",
+      "health_state": 3,
+      "error_or_warning_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "is_suppressed": false,
+      "timeline_index": 39,
+      "timeline_is_suppressed": true,
+      "timeline_name": "面取り2"
+    },
+    {
+      "index": 116,
+      "name": "CutPasteBodies1",
+      "object_type": "adsk::fusion::CutPasteBody",
+      "health_state": 1,
+      "error_or_warning_sha256": "5DC57A2FA70AAF9FE795D15970F9C589C56B31FDCD54D34F05E1E6FBDD175340",
+      "is_suppressed": false,
+      "timeline_index": 74,
+      "timeline_is_suppressed": false,
+      "timeline_name": "CutPasteBodies1"
+    }
+  ],
+  "executor": {
+    "contract_id": "fusion-inspector-json-mailbox/v1",
+    "action_mailbox": "fusion_inspector_action.json",
+    "task_lock_file": ".codex-task-lock.json",
+    "required_files": [
+      {
+        "path": "fusion_inspector/fusion_inspector.py",
+        "sha256": "FB37BFBC13B840F168D17E5957C8907880286C11147D36C3BCFD8F868F040EA0"
+      },
+      {
+        "path": "fusion_inspector/runtime_paths.py",
+        "sha256": "91F8CEFB49EBC978EDFBF2B1A679404E3ADEDA634639E55028CB0958572FA0BE"
+      },
+      {
+        "path": "fusion_inspector/bottom_z_policy.py",
+        "sha256": "4AFAE19DF7E4041008CABBF055F6D5617837D7B61B8CD5909664AE646B9C7683"
+      },
+      {
+        "path": "fusion_inspector/annular_thickness_policy.py",
+        "sha256": "0E414B5275594B607318BE98F93399C3718F8E25EAFE67392649B4B3858C957C"
+      },
+      {
+        "path": "fusion_inspector/fusion_inspector.manifest",
+        "sha256": "0941A9878ECF7CEF194B0B39D3CDA28700E3A72FB1F92A76C02995641B511195"
+      }
+    ],
+    "required_source_markers": [
+      "action == \"import_trial\"",
+      "action == \"snapshot_active\"",
+      "action == \"bottom_z_extrude_correction\"",
+      "action == \"verify_corrected_exports\""
+    ],
+    "result_paths": {
+      "action_result": "fusion_inspector_action_result.json",
+      "snapshot": "fusion_parametric_inspection.json",
+      "bottom_result": "fusion_bottom_z_projection_result.json",
+      "bottom_verify": "fusion_bottom_z_export_verification.json"
+    }
+  },
+  "recipes": {
+    "bottom-datum-add": {
+      "recipe_id": "fusion.bottom-z-add-to-datum/v1",
+      "completion_class": "historical_local_roundtrip",
+      "release_blockers": [
+        "historical_compute_all_false",
+        "f3d_roundtrip_full_preexisting_health_not_rechecked"
+      ],
+      "accepted_inputs": [
+        {
+          "sha256": "95656EB4C373CE1E5A1C16F6F7B23725570304F8EA1D268484160E01B3097CF4",
+          "size_bytes": 12206579
+        }
+      ],
+      "source_fingerprint": {
+        "main_body": {
+          "name": "ボディ39",
+          "is_solid": true,
+          "is_visible": true,
+          "volume_cm3": 5.576065352385169,
+          "area_cm2": 116.32206517300142,
+          "face_count": 496,
+          "edge_count": 1383,
+          "bounding_box": {
+            "minimum_cm": [-2.646154108521529, -6.82, 0.9999958036048865],
+            "maximum_cm": [2.6461795770155923, 3.78000002980232, 3.029069460494059]
+          }
+        },
+        "other_root_solids": [
+          {
+            "name": "ボディ1",
+            "is_solid": true,
+            "is_visible": false,
+            "volume_cm3": 0.7710915798837743,
+            "area_cm2": 73.89599134971901,
+            "face_count": 126,
+            "edge_count": 355,
+            "bounding_box": {
+              "minimum_cm": [-2.646708530445999, -6.778642614355739, 1.2963365410910574],
+              "maximum_cm": [2.646699564271715, 3.017636184559091, 3.0572792612334796]
+            }
+          }
+        ],
+        "target": {
+          "component": "DatumSurfaces",
+          "body": "UpperFrameBottom",
+          "area_cm2": 56.656774802676026,
+          "face_count": 1
+        },
+        "required_feature_names": [],
+        "forbidden_feature_prefixes": ["BottomBoundary_"],
+        "tolerance": {
+          "volume_cm3": 0.000001,
+          "area_cm2": 0.00001,
+          "bounding_box_cm": 0.000001
+        }
+      },
+      "steps": [
+        {
+          "id": "import-trial",
+          "action": {"action": "import_trial", "archive_path": "{archive_path}"},
+          "result_kind": "import_trial",
+          "result_path": "action_result",
+          "mutates_geometry": false
+        },
+        {
+          "id": "snapshot-source",
+          "action": {"action": "snapshot_active"},
+          "result_kind": "snapshot",
+          "result_path": "snapshot",
+          "mutates_geometry": false
+        },
+        {
+          "id": "apply-bottom-datum",
+          "action": {"action": "bottom_z_extrude_correction"},
+          "result_kind": "bottom_correction",
+          "result_path": "bottom_result",
+          "mutates_geometry": true
+        },
+        {
+          "id": "verify-exports",
+          "action": {"action": "verify_corrected_exports"},
+          "result_kind": "bottom_roundtrip",
+          "result_path": "bottom_verify",
+          "mutates_geometry": false
+        }
+      ],
+      "gates": {
+        "expected_source_face_count": 4,
+        "historical_source_face_indices": [81, 243, 314, 332],
+        "expected_extrude_count": 4,
+        "expected_join_count": 4,
+        "minimum_target_coverage_ratio": 0.99,
+        "maximum_f3d_relative_volume_error": 1e-09,
+        "maximum_f3d_bbox_error_cm": 1e-08,
+        "maximum_step_relative_volume_error": 0.002,
+        "maximum_step_bbox_error_cm": 0.001,
+        "expected_output_body": {
+          "name": "ボディ39",
+          "is_visible": true,
+          "volume_cm3": 6.150377719077958,
+          "area_cm2": 117.99983315454594,
+          "face_count": 616,
+          "edge_count": 1650,
+          "bounding_box": {
+            "minimum_cm": [-2.646154108521529, -6.82, 0.9999958036048865],
+            "maximum_cm": [2.6461795770155923, 3.78000002980232, 3.029069460494059]
+          }
+        }
+      },
+      "historical_evidence": {
+        "apply-bottom-datum": {
+          "path": "C:/dev/MeltMouse_ME_Dev/01_Fusion_Mechanical_Design/01_Active/upper-frame-fusion-development/fusion_bottom_z_projection_result.json",
+          "sha256": "6A8D328C7C0F7A9815F575880D4508033C1A74CF5D97B5DEFD4EEF7DBEBF5EFF"
+        },
+        "verify-exports": {
+          "path": "C:/dev/MeltMouse_ME_Dev/01_Fusion_Mechanical_Design/01_Active/upper-frame-fusion-development/fusion_bottom_z_export_verification.json",
+          "sha256": "40955DCA3808DCD850D383A87920290F9E9B1A45DC4E717D12111541EF7BE312"
+        }
+      },
+      "historical_artifacts": [
+        {
+          "type": "f3d",
+          "path": "C:/dev/MeltMouse_ME_Dev/01_Fusion_Mechanical_Design/01_Active/upper-frame-fusion-development/artifacts/01_Upper_Frame_v1.0_bottom_z_corrected_20260731_231212.f3d",
+          "size_bytes": 12733310,
+          "sha256": "EC3049F0E8059E593550D3DC89CD5AD86CFE379A6D434BACC03C2EBF8C725280"
+        },
+        {
+          "type": "step",
+          "path": "C:/dev/MeltMouse_ME_Dev/01_Fusion_Mechanical_Design/01_Active/upper-frame-fusion-development/artifacts/01_Upper_Frame_v1.0_bottom_z_corrected_20260731_231212.step",
+          "size_bytes": 3163175,
+          "sha256": "FC1D2630A948E195FD2E67B1A9B2D08842C3E3836A837A6A94EF36EACD837BE3"
+        }
+      ]
+    }
+  }
+}

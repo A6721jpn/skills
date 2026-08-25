@@ -1,0 +1,4 @@
+interface:
+  display_name: "HTML Report Pipeline"
+  short_description: "Chain evidence writing, show-me visuals, diagrams, sanitization, and HTML QA"
+  default_prompt: "Create or revise a source-grounded standalone HTML report using the evidence, show-me visual, diagram, sanitization, and validation pipeline."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rams GUI Design"
+  short_description: "Design and audit calm, functional, exact GUI systems."
+  default_prompt: "Use $rams-gui-design to design or refine this interface with functional clarity, restrained visual language, relevant state coverage, and verification proportional to the task."

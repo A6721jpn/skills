@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fusion Upper Frame Bottom to Datum"
+  short_description: "Control pinned add-only Bottom-to-Datum replays"
+  default_prompt: "Use $fusion-upper-frame-bottom-datum-add to prepare a fail-closed pinned Bottom-to-Datum replay."

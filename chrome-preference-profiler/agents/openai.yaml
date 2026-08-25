@@ -1,0 +1,7 @@
+interface:
+  display_name: "Chrome Preference Profiler"
+  short_description: "Build a private news-interest profile from Chrome history"
+  default_prompt: "Use $chrome-preference-profiler to analyze my authorized Chrome history and refresh my private news preference profile."
+
+policy:
+  allow_implicit_invocation: true
