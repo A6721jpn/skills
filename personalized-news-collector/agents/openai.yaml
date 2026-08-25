@@ -1,0 +1,7 @@
+interface:
+  display_name: "Personalized News Collector"
+  short_description: "Collect verified current news from a private interest profile"
+  default_prompt: "Use $personalized-news-collector to collect a fresh Japanese news digest from my saved preference profile."
+
+policy:
+  allow_implicit_invocation: true

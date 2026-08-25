@@ -1,0 +1,93 @@
+/*
+  Rams-informed fallback tokens.
+  Adapt to the product's semantic token system instead of importing blindly.
+*/
+
+:root {
+  color-scheme: light;
+
+  --rams-canvas: #edede7;
+  --rams-surface: #f8f8f4;
+  --rams-surface-strong: #ffffff;
+  --rams-text: #1d1e1b;
+  --rams-text-muted: #62655e;
+  --rams-border: #c8cac2;
+  --rams-border-strong: #85887f;
+  --rams-accent: #bf3f24;
+  --rams-accent-signal: #b83a21;
+  --rams-accent-subtle: #f4ddd5;
+  --rams-on-accent: #ffffff;
+  --rams-focus: #355f7c;
+  --rams-success: #2e6e4a;
+  --rams-warning: #925c00;
+  --rams-danger: #b3261e;
+  --rams-info: #355f7c;
+
+  --rams-font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --rams-font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --rams-space-1: 0.25rem;
+  --rams-space-2: 0.5rem;
+  --rams-space-3: 0.75rem;
+  --rams-space-4: 1rem;
+  --rams-space-6: 1.5rem;
+  --rams-space-8: 2rem;
+  --rams-space-12: 3rem;
+
+  --rams-radius-xs: 0.125rem;
+  --rams-radius-sm: 0.25rem;
+  --rams-radius-md: 0.5rem;
+
+  --rams-control-compact: 2rem;
+  --rams-control-default: 2.5rem;
+  --rams-control-touch: 2.75rem;
+
+  --rams-motion-fast: 90ms;
+  --rams-motion-base: 140ms;
+  --rams-motion-slow: 220ms;
+  --rams-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --rams-overlay-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --rams-canvas: #171814;
+  --rams-surface: #1f201c;
+  --rams-surface-strong: #282925;
+  --rams-text: #f0f1ea;
+  --rams-text-muted: #b4b7ae;
+  --rams-border: #3d3f38;
+  --rams-border-strong: #71746c;
+  --rams-accent: #f06a45;
+  --rams-accent-signal: #f06a45;
+  --rams-accent-subtle: #4b2a20;
+  --rams-on-accent: #171814;
+  --rams-focus: #82a9c5;
+  --rams-success: #62a97f;
+  --rams-warning: #d8a84c;
+  --rams-danger: #f07b70;
+  --rams-info: #82a9c5;
+}
+
+:focus-visible {
+  outline: 2px solid var(--rams-focus);
+  outline-offset: 2px;
+}
+
+::selection {
+  color: var(--rams-text);
+  background: var(--rams-accent-subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

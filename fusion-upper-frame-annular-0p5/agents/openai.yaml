@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fusion Upper Frame Annular 0.5 mm"
+  short_description: "Control the pinned 0.5 mm annular thickness replay"
+  default_prompt: "Use $fusion-upper-frame-annular-0p5 to prepare a fail-closed annular thickness replay."
