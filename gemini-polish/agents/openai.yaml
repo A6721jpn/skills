@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gemini Polish"
+  short_description: "人間に見せる日本語を Gemini (agy) で推敲するフックを導入・管理する"
+  default_prompt: "Use $gemini-polish to install or update the gemini-polish hooks on this machine."
