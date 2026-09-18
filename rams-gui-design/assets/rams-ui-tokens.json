@@ -2,7 +2,7 @@
   "meta": {
     "name": "Rams-informed fallback GUI tokens",
     "version": "1.1.0",
-    "usage": "Use only when the product has no suitable design system. Adapt semantic roles to the product and verify contrast in every state."
+    "usage": "Use only when the product has no suitable design system. Adapt semantic roles to the product and verify contrast in every state. border is a hairline divider (~1.5:1); use borderStrong (>=3:1) for any control whose boundary must be perceived on its own."
   },
   "color": {
     "light": {
