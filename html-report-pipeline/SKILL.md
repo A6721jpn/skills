@@ -1,6 +1,6 @@
 ---
 name: html-report-pipeline
-description: Create or revise a source-grounded standalone HTML report by chaining evidence-based writing, concise visual explanation, stale-idea guarding, purposeful diagrams, semantic HTML, artifact sanitization, and structural/browser QA. Use for technical reports, design reviews, research summaries, decision memos, and other reports that should be delivered as one self-contained HTML file.
+description: Produce or revise a self-contained HTML report with cited evidence, minimal diagrams, and validated markup. Use when the deliverable is a single HTML report file; not for Markdown or chat answers.
 ---
 
 # Html Report Pipeline
@@ -9,11 +9,19 @@ Use this as the orchestration layer for a report request. The output is a
 standalone HTML deliverable; the intermediate production context must not leak
 into the deliverable.
 
+## Requires
+
+This skill routes to sibling skills that must be installed in the same skills
+directory: `technical-report-authoring` (brief, evidence types, report template,
+`scripts/validate_report.py`), `show-me`, `pink-elephant-guard`,
+`sanitize-artifacts`, and `html`. When one is missing, skip that stage, apply
+its intent from the summary below, and list the skipped stage as unverified in
+the handoff. Do not stop the task because a sibling skill is absent.
+
 ## Invocation and scope
 
-- Apply automatically when the user asks for an HTML report, a report with
-  charts/diagrams, a technical explanation intended for delivery, or a revision
-  of an existing report.
+- Apply when the user asks for an HTML report, a report with charts/diagrams,
+  or a revision of an existing HTML report.
 - The user can explicitly invoke it with `/html-report-pipeline <topic>`.
 - Respect an existing output path and existing files. If no path is given,
   choose a task-owned report path such as `reports/<slug>.html` and do not
@@ -80,16 +88,19 @@ and artifact path across stages:
    verification requirements as audience-facing report content.
 7. **QA gate** — Run the report validator from the technical-report skill:
    `python scripts/validate_report.py <report.html>`. Fix all errors and rerun
-   until it reports `OK`. Then inspect the rendered report at desktop, narrow,
-   and print widths. Use the available browser-control capability or an allowed
+   until it reports `OK`. For a new report or a structural change, inspect the
+   rendered result at desktop, narrow, and print widths; for a local text
+   revision, one width is enough. Use the available browser-control capability or an allowed
    local HTTP route when possible; a static validator pass is not a browser
    pass. Record browser inspection as `verified` or `unverified` rather than
    inferring it from file existence or a successful script exit.
 
-## Required report contract
+## Report contract
 
-Every complete report should contain these semantic sections, with visible
-headings adapted to the requested language:
+A full report uses these semantic sections, with visible headings adapted to
+the requested language. A short report (decision memo, brief design review)
+may merge them into Summary, Decision, Evidence, Limitations, and References,
+keeping the template's semantic attributes on the merged sections:
 
 1. Executive summary
 2. Context and decision

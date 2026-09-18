@@ -4,4 +4,5 @@ interface:
   default_prompt: "Use $chrome-preference-profiler to analyze my authorized Chrome history and refresh my private news preference profile."
 
 policy:
-  allow_implicit_invocation: true
+  # History analysis requires explicit user authorization; never trigger implicitly.
+  allow_implicit_invocation: false

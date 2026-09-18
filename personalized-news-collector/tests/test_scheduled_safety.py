@@ -27,14 +27,14 @@ from test_rank_news import approved_profile  # noqa: E402
 
 NOW = "2026-08-24T12:00:00+09:00"
 TEST_TMP_ROOT = Path(
-    os.environ.get("CODEX_SKILL_TEST_TMP", Path.cwd() / "work" / ".skill-tests" / "personalized-news-collector")
+    os.environ.get("CODEX_SKILL_TEST_TMP", Path.cwd() / "work" / ".skill-tests" / "news")
 )
 TEST_TMP_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 @contextmanager
 def workspace_temp_directory():
-    path = TEST_TMP_ROOT / f"safety-{uuid.uuid4().hex}"
+    path = TEST_TMP_ROOT / f"s-{uuid.uuid4().hex[:8]}"  # short: Windows MAX_PATH
     path.mkdir()
     try:
         yield path

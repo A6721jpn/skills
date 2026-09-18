@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# NOTE: this file is vendored identically in chrome-preference-profiler and
+# personalized-news-collector. Edit both copies; a test checks they match.
 """Validate the privacy-minimized interest-profile/v1 contract."""
 
 from __future__ import annotations
