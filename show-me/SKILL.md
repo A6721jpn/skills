@@ -1,6 +1,6 @@
 ---
 name: show-me
-description: Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.
+description: Explain the current topic visually with the smallest useful view (pseudocode, call tree, file tree, diff, Mermaid, or a focused HTML page). Use when the user asks to show, draw, or visualize something, or when prose alone is not landing.
 ---
 
 Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
@@ -114,13 +114,13 @@ function expandSkill(command: string): string {
 }
 ```
 
-- For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused HTML file — a diagram, an infographic, or a short slide deck, whichever fits the point. Match the product's colors, type, spacing, and components; use real labels and data; support desktop and mobile. Then open it for the user:
+- For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused HTML file — a diagram, an infographic, or a short slide deck, whichever fits the point. Use the product's existing design tokens if they are at hand; otherwise a neutral default is fine. Use real labels and data; support desktop and mobile. Then open it for the user with the platform opener (`open` on macOS, `start` on Windows, `xdg-open` on Linux) or the available browser tool:
 
 ```
 Bash(open path/to/show-me-{description}.html)
 ```
 
-### guidance
+## Guidance
 
 Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
 

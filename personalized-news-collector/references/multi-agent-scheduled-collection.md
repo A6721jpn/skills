@@ -90,3 +90,10 @@ first prove the recorded lock PID is dead, then use `recover --resume`. A
 normal `recover` aborts and releases the stale lock without touching seen
 state. Wrong owner tokens, live locks, reparse-point paths, and conflicting
 post-prepare seen hashes fail closed.
+
+## Guard behavior (moved from SKILL.md)
+
+- A scheduled run uses `scripts/scheduled_run_guard.py start` to validate and snapshot the approved profile and initial seen state, compute immutable SHA-256 hashes, acquire an atomic exclusive lock, and fix the run timestamp and timezone. Workers receive only the projection; they never receive writable paths or the owner token.
+- The guard enforces the fixed quality preset `max_waves=4`, `max_pages=128`, `max_retries=16` total (`max_retries_per_job=2`), `max_workers=32`, `max_topic_shards=12`, `max_candidates=500`, and `deadline_seconds=1800`. Record cumulative progress with `scheduled_run_guard.py progress`; exceeding a budget or deadline aborts the run and releases the lock.
+- Write the digest with `scheduled_run_guard.atomic_write_text`, then call `scheduled_run_guard.py commit` (or `mark-digest` followed by `commit-seen`). The guard rechecks profile and initial-seen hashes before commit, journals `digest-committed` before touching seen state, updates seen idempotently, and releases the exact owner lock. Use `recover --resume` only after a crashed owner is proven dead; recovery without resume aborts with no seen mutation.
+- For v2, the profile producer has already applied conservative work/transient penalties to stored weights. The runtime intent gate is a draft-preview aid for `user_confirmed: null`; approved `user_confirmed: true` is authoritative, so that gate is intentionally not reachable in approved scheduled runs.

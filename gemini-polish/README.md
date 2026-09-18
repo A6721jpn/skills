@@ -14,7 +14,8 @@ Gemini 3.8 Flash に推敲させるフックです。依存関係は Node.js と
 - コードブロック、インラインコード、URL、パス、frontmatter、HTML コメントは、プレースホルダーへ退避してから Gemini に渡すため変更されません。
 - 推敲済みのテキストは `~/.gemini-polish/cache` に記録し、二重推敲や無限ループを防ぎます（`stop_hook_active` も参照します）。
 - 上書き前のファイルは `~/.gemini-polish/backups/` に退避します。ログは `~/.gemini-polish/log.txt` に記録されます。
-- `CLAUDE.md` / `AGENTS.md` / `MEMORY.md` および `.claude/` `.codex/` `.git/` `node_modules/` 配下はモデル向けのため対象外です。
+- `CLAUDE.md` / `AGENTS.md` / `MEMORY.md` / `SKILL.md` および `.claude/` `.codex/` `.git/` `node_modules/` 配下はモデル向けのため対象外です。
+- 先頭 512 バイトに `gemini-polish: skip` を含むファイル（例: `<!-- gemini-polish: skip -->`）は対象外です。スクリプトが生成し、他のツールが検証する Markdown にはこのマーカーを付けてください。
 - フックの仕様上、表示済みの応答をその場で書き換えることはできません（Claude Code、Codex ともに Stop フックでは「差し戻し」のみ可能なため）。そのため高速な経路（モデル自身が `text` を呼び出す）を主系統とし、Stop フックを保険として併用しています。
 
 ## セットアップ
@@ -53,6 +54,7 @@ node gemini-polish.js file README.md docs/*.md   # ファイルをその場で�
 | `docExts` | `GEMINI_POLISH_DOC_EXTS` | `.md,.markdown,.mdx,.txt,.rst,.adoc` | 推敲対象の拡張子 |
 | `excludePattern` | – | (上記) | 対象外パスの正規表現 |
 | `maxFileBytes` | – | 80000 | このサイズを超えるファイルは処理しない |
+| `skipMarker` | – | `gemini-polish: skip` | 先頭 512 バイトにこの文字列があるファイルは処理しない |
 | `rewriteResponses` | `GEMINI_POLISH_RESPONSES` | true | Stop フックで応答を差し替える |
 | `rewriteDocs` | `GEMINI_POLISH_DOCS` | true | ドキュメントを推敲する |
 | `injectInstruction` | `GEMINI_POLISH_INJECT` | true | UserPromptSubmit で指示を注入する |

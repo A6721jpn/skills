@@ -1,6 +1,6 @@
 ---
 name: repo-context-docs
-description: Use when documenting a software repository for no-context coding agents, onboarding LLMs, architecture handoff, ADR creation, progressive disclosure, context-budget reduction, or evaluating whether repo docs are easy for agents to read without guessing.
+description: Create the initial agent-facing documentation spine (reading guide, architecture overview, ADRs, milestones, runbook) for a repository that has none. Use when asked to make a repo readable for coding agents; to refresh existing agent docs use maintaining-repo-context-docs.
 ---
 
 # Repo Context Docs
@@ -11,7 +11,7 @@ Create a small documentation spine that lets a fresh coding agent form the right
 
 ## Workflow
 
-1. **Baseline with no-context readers.** Ask one or more fresh agents to read only the existing entry docs and answer: product goal, invariants, source ownership, implemented/deferred work, decision rationale, and first files for a focused change. Record files read, word count, scores, and guesses.
+1. **Baseline with no-context readers.** Ask one or more fresh agents, or if none are available read as a first-time reader yourself, to read only the existing entry docs and answer: product goal, invariants, source ownership, implemented/deferred work, decision rationale, and first files for a focused change. Record files read, word count, scores, and guesses.
 2. **Build the spine.** Add or update:
    - `README.md`: product status and links to current entry points.
    - `docs/agent-reading-guide.md`: start-here guide, task-based read order, source/test ownership, context budget.
@@ -22,7 +22,7 @@ Create a small documentation spine that lets a fresh coding agent form the right
    - `docs/runbook.md`: commands, environment, operational caveats.
    - `docs/llm-doc-evaluation.md`: repeatable rubric.
 3. **Label document roles.** Mark current-state docs, decision records, historical milestone notes, generated files, review artifacts, and stale/planned docs. Tell agents what not to read for orientation.
-4. **Evaluate again.** Run fresh no-context agents against the new spine. They should start with README + instructions + agent guide, then open only task-specific docs.
+4. **Evaluate again.** Run fresh no-context agents (or the same first-time read) against the new spine. They should start with README + instructions + agent guide, then open only task-specific docs.
 5. **Patch from failures.** If agents read too much, guessed rationale, missed source files, or found contradictions, update the smallest responsible doc.
 
 ## Document Rules
@@ -63,14 +63,7 @@ Put unresolved major choices in `docs/adr/backlog.md` instead of pretending they
 
 ## Evaluation Rubric
 
-Score 0-5:
-
-- Orientation: product, user, host/runtime, current milestone.
-- Architecture understanding: boundaries, components, state ownership, persistence, safety model.
-- Decision rationale: important constraints link to ADRs.
-- Progressive disclosure: initial docs are small; task-specific docs are discoverable.
-- Implementation readiness: likely source and test files are named before editing.
-- Context efficiency: useful model from the initial entry set; target under about 2,500 words before task-specific docs.
+Score the spine with [references/evaluation-rubric.md](references/evaluation-rubric.md), shared with `maintaining-repo-context-docs`.
 
 ## Common Failures
 
