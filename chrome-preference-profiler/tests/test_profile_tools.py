@@ -536,3 +536,20 @@ class ProfileToolTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SharedScriptSyncTests(unittest.TestCase):
+    def test_validate_profile_matches_news_collector_copy(self) -> None:
+        """validate_profile.py is vendored into personalized-news-collector; both copies must stay identical."""
+        import hashlib
+
+        ours = SCRIPTS / "validate_profile.py"
+        theirs = SCRIPTS.parent.parent / "personalized-news-collector" / "scripts" / "validate_profile.py"
+        if not theirs.exists():
+            self.skipTest("personalized-news-collector is not installed beside this skill")
+        self.assertEqual(
+            hashlib.sha256(ours.read_bytes()).hexdigest(),
+            hashlib.sha256(theirs.read_bytes()).hexdigest(),
+            "validate_profile.py differs between chrome-preference-profiler and personalized-news-collector",
+        )
+

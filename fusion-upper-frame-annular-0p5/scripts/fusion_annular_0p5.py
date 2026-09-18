@@ -93,9 +93,9 @@ def atomic_write_json(path: Path, value: Any) -> None:
     payload = (
         json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     ).encode("utf-8")
-    handle, temporary_name = tempfile.mkstemp(
-        dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp"
-    )
+    # Keep the temporary name short: Windows fails on paths over 260 characters
+    # and run directories are already deep.
+    handle, temporary_name = tempfile.mkstemp(dir=str(path.parent), prefix=".", suffix=".tmp")
     temporary = Path(temporary_name)
     try:
         with os.fdopen(handle, "wb") as stream:
@@ -110,9 +110,7 @@ def atomic_write_json(path: Path, value: Any) -> None:
 
 def atomic_copy(source: Path, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
-    handle, temporary_name = tempfile.mkstemp(
-        dir=str(destination.parent), prefix=f".{destination.name}.", suffix=".tmp"
-    )
+    handle, temporary_name = tempfile.mkstemp(dir=str(destination.parent), prefix=".", suffix=".tmp")
     temporary = Path(temporary_name)
     try:
         with source.open("rb") as input_stream, os.fdopen(handle, "wb") as output:

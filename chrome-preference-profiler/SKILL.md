@@ -28,7 +28,7 @@ Create two synchronized artifacts from the connected Chrome profile:
 5. If independent subagents are available, read [Aggregate ensemble review](references/ensemble-review.md). Send only the validated aggregate draft to reviewers, merge their typed reviews with `scripts/merge_profile_reviews.py`, and stop at statistical convergence. Never give a reviewer Chrome/history/browser access.
 6. If no subagent mechanism is available, keep the deterministic baseline, leave `inference.ensemble.status` as `not-run`, and lower no confidence merely because orchestration is unavailable.
 7. Preserve explicit user decisions over inference: confirmed topics, exclusions, intent corrections, horizon corrections, and user-set weights remain authoritative. A refresh that changes inferred content returns to `draft` unless the user explicitly approves it.
-8. Read [Profile contract](references/profile-contract.md), validate, render, and check exact synchronization:
+8. Read [Profile contract](references/profile-contract.md), validate, render, and check exact synchronization. The rendered `profile.md` starts with a `gemini-polish: skip` marker so prose-rewriting hooks leave it alone; keep it as the first line.
 
    `python scripts/validate_profile.py <path-to-profile.json>`
 
@@ -44,7 +44,7 @@ Create two synchronized artifacts from the connected Chrome profile:
 - A scheduled history refresh must write a dated draft candidate beside the current profile; it must not overwrite the last approved `profile.json`. News collection continues using that approved file until the user reviews the candidate.
 - When the user corrects a draft, preserve those corrections but keep it draft until separate explicit approval. On approval, every topic must have `user_confirmed: true` or `false`, and at least one confirmed topic must be news-eligible.
 - Never learn silently from missing clicks or passive behavior. Explicit feedback such as boost, mute, work-only, temporary, or long-term may update the next draft.
-- When model selection is exposed and the user requests the quality-first multi-agent route, prefer `gpt-5.6-luna` reviewers with `max` reasoning. Availability and concurrency are runtime capabilities, not assumptions the skill may claim as guarantees.
+- When model selection is exposed and the user requests the quality-first multi-agent route, use the strongest reasoning model available for reviewers. Availability and concurrency are runtime capabilities, not assumptions the skill may claim as guarantees.
 
 ## Longer coverage and handoff
 

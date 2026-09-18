@@ -1,6 +1,6 @@
 ---
 name: maintaining-repo-context-docs
-description: Use when a repository already has LLM-friendly docs or an agent reading guide, but development has continued and Codex needs to audit, refresh, or repair stale documentation, ADRs, milestone labels, source/test ownership maps, runbooks, or context-efficiency scores.
+description: Audit and refresh a repository's existing agent-facing docs (reading guide, architecture overview, ADRs, milestones, ownership maps, runbook) after development has moved on. Use when such docs exist but are stale or conflicting; to create them from scratch use repo-context-docs.
 ---
 
 # Maintaining Repo Context Docs
@@ -19,7 +19,7 @@ Refresh an existing repository documentation spine after code and tests have mov
    - architecture overview vs implemented modules.
    - ADRs vs new design constraints.
    - milestone table vs test directories and feature docs.
-   - runbook commands vs `package.json`.
+   - runbook commands vs the project's build/config manifest.
    - generated/review/planning artifacts vs current-state labels.
    - forward-looking contract tests that now pass vs docs still calling the work planned.
 4. **Patch the smallest responsible doc.** Fix the doc closest to the drift:
@@ -50,16 +50,7 @@ Refresh an existing repository documentation spine after code and tests have mov
 
 ## Scores To Track
 
-Use the repo's existing rubric if present. Otherwise score 0-5:
-
-- Orientation
-- Architecture understanding
-- Decision rationale
-- Progressive disclosure
-- Implementation readiness
-- Context efficiency
-
-Record before/after scores and initial-entry word count. Treat a score drop, more guessing, or a larger initial read set as documentation regression.
+Use the shared rubric in `repo-context-docs/references/evaluation-rubric.md` (or the repo's own). Record before/after scores and the initial-entry word count; a score drop, more guessing, or a larger initial read set is a regression.
 
 ## Relationship To Initial Creation
 
@@ -67,10 +58,5 @@ If the repo has no agent guide, current architecture overview, ADR area, milesto
 
 ## Stop Conditions
 
-Stop after the smallest coherent refresh. Do not opportunistically rewrite all docs, normalize prose style everywhere, or update historical notes unless they actively mislead current readers.
+Stop after the smallest coherent refresh. Do not opportunistically rewrite all docs, normalize prose style everywhere, or update historical notes unless they actively mislead current readers. Keep the audit narrow: identify drift symptoms first, then open only the responsible docs and the minimum source/tests needed to verify reality.
 
-## Baseline Failure Signals
-
-Without this skill, agents often over-read: README, guide, architecture, all ADRs, source, tests, runbook, and milestone history. That can find drift, but burns context and may blur current baseline vs future contracts.
-
-Keep the audit narrow: identify drift symptoms first, then open only the responsible docs and the minimum source/tests needed to verify reality.

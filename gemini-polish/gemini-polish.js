@@ -41,8 +41,10 @@ const DEFAULTS = {
   docExts: ['.md', '.markdown', '.mdx', '.txt', '.rst', '.adoc'],
   // モデル向け指示ファイルやツール自身は対象外
   excludePattern:
-    '(^|[\\\\/])(\\.claude|\\.codex|\\.git|node_modules|\\.gemini-polish)([\\\\/]|$)|(^|[\\\\/])(CLAUDE|AGENTS|MEMORY)\\.md$',
+    '(^|[\\\\/])(\\.claude|\\.codex|\\.git|node_modules|\\.gemini-polish)([\\\\/]|$)|(^|[\\\\/])(CLAUDE|AGENTS|MEMORY|SKILL)\\.md$',
   maxFileBytes: 80000,
+  // 先頭 512 バイトにこの文字列を含むファイル（機械生成物など）は推敲しない
+  skipMarker: 'gemini-polish: skip',
   rewriteResponses: true, // Stop フックで応答を差し替える
   rewriteDocs: true, // PostToolUse でドキュメントを書き直す
   bashHeuristic: true, // シェルコマンド文字列から書かれたドキュメントを推定する
@@ -315,6 +317,7 @@ function polishFile(file, cfg) {
   if (!st.isFile()) return { file: abs, status: 'skip', reason: 'ファイルでない' };
   if (st.size > cfg.maxFileBytes) return { file: abs, status: 'skip', reason: `サイズ超過 (${st.size}B)` };
   const original = fs.readFileSync(abs, 'utf8');
+  if (cfg.skipMarker && original.slice(0, 512).includes(cfg.skipMarker)) return { file: abs, status: 'skip', reason: 'skip マーカー' };
   if (jaCount(original) < cfg.minJaChars) return { file: abs, status: 'skip', reason: '日本語が少ない' };
   if (alreadyPolished(original)) return { file: abs, status: 'cached' };
 

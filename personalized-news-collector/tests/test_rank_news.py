@@ -14,7 +14,7 @@ from pathlib import Path
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 RANKER = SKILL_ROOT / "scripts" / "rank_news.py"
 NOW = "2026-08-24T12:00:00+09:00"
-TEST_TMP_ROOT = Path(os.environ.get("CODEX_SKILL_TEST_TMP", Path.cwd() / "work" / ".skill-tests" / "personalized-news-collector"))
+TEST_TMP_ROOT = Path(os.environ.get("CODEX_SKILL_TEST_TMP", Path.cwd() / "work" / ".skill-tests" / "news"))
 TEST_TMP_ROOT.mkdir(parents=True, exist_ok=True)
 
 
