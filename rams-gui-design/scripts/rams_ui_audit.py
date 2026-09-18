@@ -193,7 +193,7 @@ def display_path(path: Path) -> str:
 
 def clean_excerpt(line: str, width: int = 180) -> str:
     compact = " ".join(line.strip().split())
-    return compact if len(compact) <= width else compact[: width - 1] + "…"
+    return compact if len(compact) <= width else compact[: width - 3] + "..."
 
 
 def full_line_comment(line: str) -> bool:
@@ -278,7 +278,7 @@ def scan_lines(record: FileRecord, findings: list[Finding]) -> None:
             "Confirm that fully rounded geometry expresses status, selection, a switch, or another real semantic role.",
         ),
         (
-            re.compile(r"\b(?:border-radius|cornerRadius)\s*[:=]\s*(?:1[6-9]|[2-9]\d|\d{3,})px", re.I),
+            re.compile(r"\b(?:border-radius|cornerRadius)\s*[:=]\s*(?:1[6-9]|[2-9]\d|(?!999)\d{3,})px", re.I),
             "low",
             "geometry.large-radius",
             "Large radii should be reserved for touch comfort or a specific semantic role, not used as a default container style.",
@@ -338,9 +338,12 @@ def scan_lines(record: FileRecord, findings: list[Finding]) -> None:
     for match in re.finditer(r"<button\b([^>]*)>(.*?)</button\s*>", record.text, re.I | re.S):
         attrs, content = match.group(1), match.group(2)
         textual_content = re.sub(r"<[^>]+>", " ", content)
+        # A JSX/template expression such as {label} or {t("save")} usually
+        # renders visible text; static analysis cannot prove otherwise.
+        has_expression_child = bool(re.search(r"\{[^{}]*\}", textual_content))
         textual_content = re.sub(r"\{[^{}]*\}", " ", textual_content).strip()
         has_accessible_name = re.search(r"\b(?:aria-label|aria-labelledby)\s*=", attrs, re.I)
-        if not textual_content and not has_accessible_name:
+        if not textual_content and not has_accessible_name and not has_expression_child:
             line_no = record.text.count("\n", 0, match.start()) + 1
             has_title_only = re.search(r"\btitle\s*=", attrs, re.I)
             message = (
@@ -392,6 +395,18 @@ def scan_project(records: Sequence[FileRecord], findings: list[Finding]) -> None
     has_focus_replacement = bool(
         re.search(r":focus-visible|focusVisible|focused\s*\?", all_text, re.I)
     )
+    if removes_outline and has_focus_replacement:
+        # A visible replacement exists; per-line outline findings are advisory only.
+        for i, finding in enumerate(findings):
+            if finding.rule == "accessibility.focus-outline-removed":
+                findings[i] = Finding(
+                    severity="medium",
+                    rule=finding.rule,
+                    path=finding.path,
+                    line=finding.line,
+                    message="A focus outline is removed; a :focus-visible replacement was found elsewhere, so confirm it covers this selector.",
+                    excerpt=finding.excerpt,
+                )
     if removes_outline and not has_focus_replacement:
         findings.append(
             Finding(
@@ -471,7 +486,7 @@ def output_text(findings: Sequence[Finding], scanned: int, skipped: int) -> None
 
     for finding in findings:
         location = finding.path if finding.line <= 0 else f"{finding.path}:{finding.line}"
-        print(f"[{finding.severity.upper()}] {finding.rule} — {location}")
+        print(f"[{finding.severity.upper()}] {finding.rule} - {location}")
         print(f"  {finding.message}")
         if finding.excerpt:
             print(f"  > {finding.excerpt}")
@@ -502,6 +517,12 @@ def output_json(findings: Sequence[Finding], scanned: int, skipped: int) -> None
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
+
+    # Console encodings such as cp932 cannot represent every character in
+    # findings or excerpts; never let output encoding abort the audit.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
 
     try:
         source_files = list(iter_source_files(args.paths, args.max_files))

@@ -69,6 +69,7 @@ Aim for six simultaneous qualities:
 - Use pills only when the semantics are pill-like: status, tag, compact filter, segmented selection, or rounded switch track.
 - Use circular geometry for radial or continuous mapping, icon controls, avatars, or signals—not as generic decoration.
 - Keep border thickness generally to 1 px. Use 2 px for focus, selected emphasis, or physical-control-like active feedback.
+- Use the hairline `border` token only for dividers inside an already-perceivable region. A control's sole boundary (input, checkbox, segmented control) must use `borderStrong` or another value meeting 3:1 against its background.
 - Avoid nested rounded rectangles and mixed radius systems.
 
 ## 7. Surface and elevation
