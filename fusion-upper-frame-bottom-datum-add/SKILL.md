@@ -16,9 +16,10 @@ Fusion qualification and reopen run.
 
 ## Boundaries
 
-- Use only the F3D SHA-256 and size accepted by
-  `assets/upper-frame-bottom-datum-v1-profile.json`. A different input is a new
-  qualification task, not a replay.
+- Use only the F3D accepted by `assets/upper-frame-bottom-datum-v1-profile.json`:
+  SHA-256 `95656EB4C373CE1E5A1C16F6F7B23725570304F8EA1D268484160E01B3097CF4`,
+  size `12206579` bytes. A different input is a new qualification task, not a
+  replay.
 - Never edit the protected historical task merely to run this skill. Point the
   CLI at an executor task that passes `doctor`. Its active
   `.codex-task-lock.json` must belong to the current task/thread and protect the

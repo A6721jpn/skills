@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import hashlib
 import shutil
 import unittest
 from datetime import datetime, timezone
@@ -32,7 +33,7 @@ class FusionBottomDatumTests(unittest.TestCase):
     def setUp(self):
         test_temp_root = SKILL_ROOT / ".test-work"
         test_temp_root.mkdir(exist_ok=True)
-        self.temp = test_temp_root / self._testMethodName
+        self.temp = test_temp_root / hashlib.sha1(self._testMethodName.encode()).hexdigest()[:8]  # short: Windows MAX_PATH
         if self.temp.exists():
             shutil.rmtree(self.temp)
         self.temp.mkdir()
