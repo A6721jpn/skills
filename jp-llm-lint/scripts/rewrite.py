@@ -8,7 +8,8 @@
 
 環境変数:
   JPLLMLINT_URL      既定 http://hub:8765（Tailscale MagicDNS。IP 指定も可）
-  JPLLMLINT_TIMEOUT  秒。既定 180
+  JPLLMLINT_TIMEOUT  生成待ちの秒数。既定 180
+  JPLLMLINT_PROBE    接続確認（/health）の秒数。既定 3。経路が黙って落ちていても数秒でフォールバックする
 
 終了コード: 0 = 書き直し成功、2 = フォールバック（原文を出力）、3 = 接続失敗・エラー（原文を出力）
 標準エラーに 1 行だけ状態を出す（本文は出さない）。
@@ -56,6 +57,15 @@ def main() -> int:
     text = open(a.file, encoding="utf-8").read() if a.file else sys.stdin.read()
     if not text.strip():
         return 0
+    # 1) 短い疎通確認。経路が黙って落ちている（パケットが捨てられる）場合でも、生成待ちの長いタイムアウトを待たずに原文へ戻す
+    probe = float(os.environ.get("JPLLMLINT_PROBE", "3"))
+    try:
+        call("/health", None, probe)
+    except (urllib.error.URLError, TimeoutError, OSError, ValueError) as e:
+        print(f"jp-llm-lint: unreachable ({type(e).__name__}, probe {probe:g}s); returning original", file=sys.stderr)
+        sys.stdout.write(text)
+        return 3
+    # 2) 本体。生成には 1000 字あたり 35〜40 秒かかる
     try:
         r = call("/rewrite", {"text": text}, a.timeout)
     except (urllib.error.URLError, TimeoutError, OSError, ValueError) as e:

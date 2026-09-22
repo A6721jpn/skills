@@ -16,7 +16,8 @@ macOS / Linux：`cp -r jp-llm-lint ~/.codex/skills/` の後、`python3 ~/.codex/
 ## 接続先
 
 - 既定 `http://hub:8765`（Tailscale MagicDNS）。名前解決できない場合は `JPLLMLINT_URL=http://100.91.209.1:8765`
-- タイムアウトは `JPLLMLINT_TIMEOUT`（秒、既定 180）。応答は 1000 字あたり 35〜40 秒
+- 生成待ちは `JPLLMLINT_TIMEOUT`（秒、既定 180）、接続確認は `JPLLMLINT_PROBE`（秒、既定 3）。応答は 1000 字あたり 35〜40 秒
+- **ネットワーク障害時の挙動**：まず 3 秒の `/health` 確認に失敗した時点で原文をそのまま出力（終了コード 3）。名前解決失敗・接続拒否・経路断のいずれも数秒以内にフォールバックし、回答は失われない
 
 ## 使い方
 
