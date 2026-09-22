@@ -5,6 +5,7 @@
   python rewrite.py < draft.txt            # 書き直した本文を標準出力へ（失敗時は原文をそのまま出力）
   python rewrite.py --file draft.txt --json  # API の応答 JSON をそのまま出力
   python rewrite.py --health                 # 稼働確認
+  python rewrite.py --force < draft.txt      # 強制モード：Guard の意味検査で不合格でも書き直しを返す（ユーザーの明示指示があるときだけ）
 
 環境変数:
   JPLLMLINT_URL      既定 http://hub:8765（Tailscale MagicDNS。IP 指定も可）
@@ -40,6 +41,7 @@ def main() -> int:
     ap.add_argument("--file", help="入力ファイル（UTF-8）。省略時は標準入力")
     ap.add_argument("--json", action="store_true", help="API 応答の JSON をそのまま出力")
     ap.add_argument("--health", action="store_true")
+    ap.add_argument("--force", action="store_true", help="Guard の意味検査をバイパスして書き直しを返す（明示指示時のみ）")
     ap.add_argument("--timeout", type=float, default=float(os.environ.get("JPLLMLINT_TIMEOUT", "180")))
     a = ap.parse_args()
     for s in (sys.stdin, sys.stdout, sys.stderr):  # Windows の cp932 既定を避け、入出力とも UTF-8 に固定
@@ -67,7 +69,10 @@ def main() -> int:
         return 3
     # 2) 本体。生成には 1000 字あたり 35〜40 秒かかる
     try:
-        r = call("/rewrite", {"text": text}, a.timeout)
+        payload = {"text": text}
+        if a.force:
+            payload["force"] = True
+        r = call("/rewrite", payload, a.timeout)
     except (urllib.error.URLError, TimeoutError, OSError, ValueError) as e:
         print(f"jp-llm-lint: unavailable ({type(e).__name__}); returning original", file=sys.stderr)
         sys.stdout.write(text)
@@ -75,11 +80,19 @@ def main() -> int:
     if a.json:
         print(json.dumps(r, ensure_ascii=False))
         return 0 if not r.get("fallback") else 2
+    g = r.get("guard") or {}
     if r.get("fallback") or not r.get("changed"):
-        reasons = ",".join((r.get("guard") or {}).get("reasons") or []) or "unchanged"
+        reasons = ",".join(g.get("reasons") or []) or "unchanged"
+        if g.get("force_denied"):
+            reasons += ",force_denied"
         print(f"jp-llm-lint: fallback ({reasons}); returning original", file=sys.stderr)
         sys.stdout.write(text)
         return 2
+    if g.get("bypassed"):
+        reasons = ",".join(g.get("reasons") or []) or "-"
+        print(f"jp-llm-lint: rewritten with guard BYPASSED (guard reasons: {reasons}); review before use", file=sys.stderr)
+        sys.stdout.write(r["rewritten"])
+        return 0
     print(f"jp-llm-lint: rewritten ({round(r.get('latency_ms', 0))} ms)", file=sys.stderr)
     sys.stdout.write(r["rewritten"])
     return 0
