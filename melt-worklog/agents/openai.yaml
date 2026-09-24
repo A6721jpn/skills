@@ -1,0 +1,4 @@
+interface:
+  display_name: "Melt 作業日報"
+  short_description: "両PCのCodex・OrcaとSlackから、その日の仕事を根拠付きで日報化"
+  default_prompt: "$melt-worklog を使って今日の作業日報を作って。"

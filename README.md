@@ -16,6 +16,7 @@ Codex / Claude Code で使うスキルとフックをまとめたリポジトリ
 | [japanese-tech-writing](./japanese-tech-writing) | 日本語の技術文書・書籍原稿について、構成、論証の厳密さ、用語、視点、読み手の負荷、冗長さを整える文章規範です。 | 日本語で技術書の章、記事、解説文を書くときや、既存原稿を推敲・リライトするときに使用します。 |
 | [jp-llm-lint](./jp-llm-lint) | Codex の日本語回答を、Tailscale 内の JP-LLM-LINT サービス（hub）に送って読み手向けに再構成します。クライアント用のエントリーポイントだけを含みます。 | `$jp-llm-lint` で明示起動、または日本語の回答を読みやすくしたいときに使用します。サービスが拒否・停止していれば原文のまま返ります。機密を含む本文には使いません。 |
 | [maintaining-repo-context-docs](./maintaining-repo-context-docs) | 開発が進んで古くなったエージェント向けドキュメントを監査・更新します。 | そうしたドキュメントが既にあり、古くなったり矛盾したりしているときに使用します。ゼロから作る場合は repo-context-docs を使います。 |
+| [melt-worklog](./melt-worklog) | 両PCのCodex・OrcaとMelt ConnectのSlackから、その日の作業を根拠付きで日報にまとめます。 | 簡潔な日報と項目ごとの出典リンクを生成し、リンクの欠落・参照先の不整合を機械検査します。NotionタスクDBとの同期は未実装です。収集ログや日報実データは含みません。 |
 | [personalized-news-collector](./personalized-news-collector) | 承認済みの関心プロファイルをもとに、最新ニュースをWebで検証し、出典付きの日本語ダイジェストとして整理します。 | ニュース収集時の重複排除と話題の多様性を扱います。Chrome履歴を直接読んだり、プロファイルを自動生成したりはしません。 |
 | [rams-gui-design](./rams-gui-design) | ディーター・ラムス／ブラウンに通じる、抑制された機能主義的なGUIを設計・実装・リファクタリング・監査します。 | ユーザーまたはリポジトリがラムス風／機能主義のUI方向性を明示的に求めたときのみ使用します。一般的なGUI作業には適用しません。 |
 | [repo-context-docs](./repo-context-docs) | エージェント向けドキュメントの骨格（読み方ガイド、アーキテクチャ概要、ADR、マイルストーン、runbook）をまだ持たないリポジトリに新規作成します。 | リポジトリをコーディングエージェントが読めるようにしたいときに使用します。既存ドキュメントの更新は maintaining-repo-context-docs を使います。 |
@@ -34,4 +35,4 @@ Codex / Claude Code で使うスキルとフックをまとめたリポジトリ
 - `fusion-upper-frame-annular-0p5` と `fusion-upper-frame-bottom-datum-add` は、特定のプロジェクト（Upper Frame の F3D、SHA-256 固定）専用の再現用コントローラです。汎用スキルではなく、fail-closed な CAD 操作スキルの実装例として公開しています。
 - Windows で `personalized-news-collector` や `fusion-*` のテスト・実行が `FileNotFoundError` / `WinError 206` で失敗する場合は、パス長が 260 文字を超えています。長いパスを有効化（`LongPathsEnabled`）するか、リポジトリやデータルートを短いパス（例: `C:\skills`）に置いてください。
 
-更新日: 2026-09-18
+更新日: 2026-09-24
