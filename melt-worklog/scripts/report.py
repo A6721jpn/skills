@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 import re
 import sys
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, quote
 from collect import JST, bounds, clean, timestamp, merge
 
 
@@ -24,6 +24,15 @@ def save_json(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def one_line(value):
+    return ' '.join(str(value).split())
+
+
+def task_heading(task):
+    mark = "（推定）" if task.get("confidence") == "inferred" else ""
+    return one_line(task['project']+'：'+task['title']) + mark
+
+
 def slack_url(record):
     url = record.get("permalink")
     if not url:
@@ -37,7 +46,7 @@ def slack_url(record):
 
 
 def source_links(task, evidence, source_path):
-    links = [("ログ・根拠", source_path.name + "#task-" + task["id"])]
+    links = [("ログ・根拠（ローカル）", quote(source_path.name) + "#task-" + task["id"])]
     for eid in task["evidence_ids"]:
         url = slack_url(evidence[eid])
         if url and url not in [u for _, u in links]:
@@ -73,7 +82,23 @@ def check_sources(markdown, data, evidence, source_path):
     if not source_path.is_file():
         raise ValueError("Source file missing")
     source = source_path.read_text(encoding='utf-8')
-    blocks = re.findall(r'<!-- task:([A-Za-z0-9_-]+) -->\n(.*?)<!-- /task -->', markdown, re.S)
+    if data.get('report_format') == 'notion-copy-v1':
+        if '<!--' in markdown or '-->' in markdown:
+            raise ValueError('Internal markers must not appear in the report')
+        # Map visible headings to task IDs in the JSON sidecar, without hidden markup.
+        headings = [task_heading(t) for t in data['tasks']]
+        if len(set(headings)) != len(headings):
+            raise ValueError('Task headings must be distinct')
+        found = re.findall(r'^### ([^\n]+)\n(.*?)(?=^#{1,3} |\Z)', markdown, re.M | re.S)
+        if collections.Counter(h for h, _ in found) != collections.Counter(headings):
+            raise ValueError('Missing or duplicate task headings')
+        by_heading = dict(found)
+        blocks = [(t['id'], by_heading[task_heading(t)]) for t in data['tasks']]
+        citation_pattern = r'^出典：(.*)$'
+    else:
+        # Previously generated reports remain verifiable.
+        blocks = re.findall(r'<!-- task:([A-Za-z0-9_-]+) -->\n(.*?)<!-- /task -->', markdown, re.S)
+        citation_pattern = r'^  出典：(.*)$'
     expected_ids = [t['id'] for t in data['tasks']]
     actual_ids = [key for key, _ in blocks]
     if sorted(actual_ids) != sorted(expected_ids):
@@ -82,11 +107,13 @@ def check_sources(markdown, data, evidence, source_path):
     checked = 0
     for task in data['tasks']:
         block = by_id[task['id']]
-        lines = re.findall(r'^  出典：(.*)$', block, re.M)
+        lines = re.findall(citation_pattern, block, re.M)
         if len(lines) != 1:
             raise ValueError("Missing source links: " + task['id'])
         links = re.findall(r'\[[^\]\n]+\]\(([^\s)]+)\)', lines[0])
         expected = [u for _, u in source_links(task, evidence, source_path)]
+        if data.get('report_format') != 'notion-copy-v1':
+            expected[0] = source_path.name + '#task-' + task['id']
         if set(links) != set(expected):
             raise ValueError("Source links missing or mismatched: " + task['id'])
         section = re.search(r'<section id="task-'+re.escape(task['id'])+r'">(.*?)</section>', source, re.S)
@@ -97,7 +124,86 @@ def check_sources(markdown, data, evidence, source_path):
             raise ValueError("Source evidence mismatch: " + task['id'])
         checked += len(links)
     return {"status": "passed", "tasks_checked": len(expected_ids), "links_checked": checked,
+            "task_headings": {t['id']: task_heading(t) for t in data['tasks']},
             "scope": "Markdown citation presence, exact targets, local file/anchor and evidence ID mapping; external HTTP availability not checked."}
+
+
+def clipboard_body(markdown, directory):
+    """Convert only our emitted heading/paragraph/list/link subset to rich text."""
+    def inline(text):
+        parts, pos = [], 0
+        for m in re.finditer(r'\[([^\]\n]+)\]\(([^\s)]+)\)', text):
+            parts.append(html.escape(text[pos:m.start()]))
+            label, url = m.groups()
+            if not urlsplit(url).scheme:
+                url = directory.resolve().as_uri() + '/' + url
+            parts.append('<a href="'+html.escape(url, quote=True)+'">'+html.escape(label)+'</a>')
+            pos = m.end()
+        return ''.join(parts) + html.escape(text[pos:])
+
+    parts, in_list = [], False
+    for line in markdown.splitlines():
+        if not line.strip():
+            if in_list:
+                parts.append('</ul>'); in_list = False
+            continue
+        heading = re.fullmatch(r'(#{1,3}) (.+)', line)
+        if line.startswith('- '):
+            if not in_list:
+                parts.append('<ul>'); in_list = True
+            parts.append('<li>'+inline(line[2:])+'</li>')
+        else:
+            if in_list:
+                parts.append('</ul>'); in_list = False
+            if heading:
+                tag = 'h'+str(len(heading[1]))
+                parts.append('<'+tag+'>'+html.escape(heading[2])+'</'+tag+'>')
+            else:
+                parts.append('<p>'+inline(line)+'</p>')
+    if in_list:
+        parts.append('</ul>')
+    return '\n'.join(parts)
+
+
+def copy_page(markdown, directory):
+    body = clipboard_body(markdown, directory)
+    # JSON is outside the copied article; prevent user text from closing the script.
+    plain = json.dumps(markdown, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+    return '''<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>日報 — Notion貼り付け用</title>
+<style>body{max-width:880px;margin:32px auto;padding:0 24px;font:16px/1.8 system-ui,sans-serif;color:#222}nav{padding:16px;background:#f5f5f5;border-radius:8px}button{padding:10px 18px;font:inherit;cursor:pointer}h2{margin-top:36px}h3{margin-bottom:8px}p{margin:8px 0 16px}a{color:#245fc5;overflow-wrap:anywhere}small{display:block}#status{margin-left:12px}@media print{nav{display:none}}</style></head><body>
+<nav><button id="copy" type="button">日報をコピー</button><span id="status" role="status"></span>
+<small>コピー後、Notion本文に Ctrl+V で貼り付けてください。通常の貼り付けで見出し・段落・リンクを渡します。</small>
+<small>「ローカル」の出典はこのPC上のファイルです。Notion上で開くには、出典を利用できる場所へ配置してリンクを差し替える必要があります。</small></nav>
+<article id="report">''' + body + '''</article>
+<script id="plain" type="application/json">''' + plain + '''</script>
+<script>
+document.getElementById('copy').addEventListener('click', async () => {
+  const report = document.getElementById('report');
+  const status = document.getElementById('status');
+  try {
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html': new Blob([report.innerHTML], {type:'text/html'}),
+      'text/plain': new Blob([JSON.parse(document.getElementById('plain').textContent)], {type:'text/plain'})
+    })]);
+    status.textContent = 'コピーしました';
+  } catch (_) {
+    const range = document.createRange(); range.selectNodeContents(report);
+    const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+    status.textContent = '本文を選択しました。Ctrl+C でコピーしてください';
+  }
+});
+</script></body></html>'''
+
+
+def check_copy_page(document, markdown, directory):
+    article = re.search(r'<article id="report">(.*?)</article>', document, re.S)
+    if not article or article[1] != clipboard_body(markdown, directory):
+        raise ValueError('Copy page content or source links mismatch')
+    plain = re.search(r'<script id="plain" type="application/json">(.*?)</script>', document, re.S)
+    if not plain or json.loads(plain[1]) != markdown:
+        raise ValueError('Plain clipboard content mismatch')
 
 
 def import_slack(bundle, paths):
@@ -200,21 +306,21 @@ def render(bundle, tasks_path, out):
     evidence_path = out / (prefix+"-evidence.json")
     save_json(evidence_path, {"manifest": manifest, "evidence": list(selected.values())})
     task_path = out / (prefix+"-tasks.json")
+    data['report_format'] = 'notion-copy-v1'
     save_json(task_path, data)
     source_path = out / (prefix+"-sources.html")
     write_sources(source_path, tasks, selected)
     md = ["# 作業日報 — "+manifest["date"], "", "日本時間・"+manifest["collected_at"][11:16]+"時点。AIの実行と本人の報告を集約。", ""]
     if data.get("summary"):
-        md += [data["summary"], ""]
+        md += [one_line(data["summary"]), ""]
     for status, label in statuses.items():
         group = [t for t in tasks if t["status"] == status]
         if not group:
             continue
         md += ["## "+label, ""]
         for t in group:
-            mark = "（推定）" if t["confidence"] == "inferred" else ""
-            md += ["<!-- task:"+t['id']+" -->", "- **"+t["project"]+"："+t["title"]+"**"+mark+"  ", "  "+t.get("brief", t["outcome"])+"  ",
-                   "  出典："+" / ".join('['+label+']('+url+')' for label,url in source_links(t,selected,source_path)), "<!-- /task -->", ""]
+            md += ["### "+task_heading(t), "", one_line(t.get("brief", t["outcome"])), "",
+                   "出典："+" / ".join('['+label+']('+url+')' for label,url in source_links(t,selected,source_path)), ""]
     md += ["## 補足", "", "両PCのCodex・Orca関連ログとSlackを集約。個別の根拠・次の対応は末尾のJSONに保存。"]
     if manifest["slack"]["status"] != "collected":
         md.append("Slack取得状態："+manifest["slack"]["status"]+"（不足あり）。")
@@ -222,14 +328,21 @@ def render(bundle, tasks_path, out):
         if cov.get("errors") or cov.get("malformed_lines"):
             md.append("- "+cov["host"]+"：収集エラー "+str(len(cov.get("errors", [])))+"件、読めなかった行 "+str(cov.get("malformed_lines", 0))+"件。詳細は根拠ファイルを参照。")
     for note in data.get("brief_limitations", data.get("limitations", [])):
-        md.append("- "+note)
+        md.append("- "+one_line(note))
+    md += ["", "ローカルの出典ファイルはNotionへ貼り付けるだけでは参照できません。Slackは元投稿へのリンクです。"]
     md += ["", "[根拠と収集状況]("+evidence_path.name+") · [タスク一覧JSON]("+task_path.name+")", ""]
     report = out / (prefix+"-日報.md")
     rendered = "\n".join(md)
     result = check_sources(rendered, data, selected, source_path)
+    document = copy_page(rendered, out)
+    check_copy_page(document, rendered, out)
+    result['copy_page_checked'] = True
     report.write_text(rendered, encoding="utf-8")
+    copy_path = out / (prefix+'-Notion貼付用.html')
+    copy_path.write_text(document, encoding='utf-8')
     save_json(out / (prefix+"-source-check.json"), result)
     print(str(report.resolve()))
+    print(str(copy_path.resolve()))
 
 
 def main():
@@ -258,6 +371,10 @@ def main():
         data = read_json(a.report.with_name(prefix+'-tasks.json'))
         ev = read_json(a.report.with_name(prefix+'-evidence.json'))
         result = check_sources(a.report.read_text(encoding='utf-8'), data, {r['id']:r for r in ev['evidence']}, a.report.with_name(prefix+'-sources.html'))
+        if data.get('report_format') == 'notion-copy-v1':
+            copy_path = a.report.with_name(prefix+'-Notion貼付用.html')
+            check_copy_page(copy_path.read_text(encoding='utf-8'), a.report.read_text(encoding='utf-8'), a.report.parent)
+            result['copy_page_checked'] = True
         print(json.dumps(result, ensure_ascii=False))
     elif a.cmd == "import-slack":
         import_slack(a.bundle, a.input)

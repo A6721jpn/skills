@@ -7,10 +7,66 @@ import unittest
 from unittest.mock import patch
 
 from collect import bounds, host_collect, merge, timestamp, write_bundle
-from report import import_slack, render, write_sources, check_sources, source_links
+from report import import_slack, render, write_sources, check_sources, source_links, copy_page, check_copy_page
 
 
 class WorklogTest(unittest.TestCase):
+    def test_notion_copy_output_and_source_checks(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            write_bundle(root, '2026-09-24', [])
+            manifest = json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+            manifest['slack'] = {'status':'collected'}
+            (root/'manifest.json').write_text(json.dumps(manifest), encoding='utf-8')
+            evidence = [{'id':'e'+str(i), 'text':'done', 'agent':'codex',
+                         'timestamp':'2026-09-24T10:00:00+09:00', 'time_basis':'event',
+                         'kind':'assistant_final',
+                         'origins':[{'host':'PC', 'path':'log.jsonl', 'locator':i}]}
+                        for i in [1, 2]]
+            evidence[0]['permalink'] = 'https://example.slack.com/archives/C123/p1234567890000000'
+            (root/'evidence.jsonl').write_text('\n'.join(json.dumps(e) for e in evidence), encoding='utf-8')
+            tasks = {'date':'2026-09-24', 'tasks':[
+                {'id':'t'+str(i), 'project':'CAD', 'title':'作業'+str(i), 'outcome':'保存を確認。',
+                 'status':'completed', 'confidence':'reported', 'evidence_ids':['e'+str(i)]}
+                for i in [1, 2]]}
+            task_path = root/'tasks.json'
+            task_path.write_text(json.dumps(tasks), encoding='utf-8')
+            render(root, task_path, root/'out')
+            report = next((root/'out').glob('*-日報.md'))
+            md = report.read_text(encoding='utf-8')
+            prefix = report.name.removesuffix('-日報.md')
+            source_path = report.with_name(prefix+'-sources.html')
+            data = json.loads(report.with_name(prefix+'-tasks.json').read_text(encoding='utf-8'))
+            by_id = {e['id']:e for e in evidence}
+            self.assertNotIn('<!--', md)
+            self.assertNotIn('&#x20;', md)
+            self.assertFalse(any(line.endswith('  ') for line in md.splitlines()))
+            self.assertEqual(check_sources(md, data, by_id, source_path)['tasks_checked'], 2)
+            for bad in [md.replace('出典：', '根拠ID：', 1),
+                        md.replace('### CAD：作業1', '### CAD：作業2'),
+                        md.replace('#task-t1', '#task-t2'),
+                        md.replace('[Slack]('+evidence[0]['permalink']+')', ''),
+                        md+'\n### CAD：作業1\n']:
+                with self.subTest(bad=bad), self.assertRaises(ValueError):
+                    check_sources(bad, data, by_id, source_path)
+            page = report.with_name(prefix+'-Notion貼付用.html').read_text(encoding='utf-8')
+            check_copy_page(page, md, report.parent)
+            self.assertIn('<h3>CAD：作業1</h3>', page)
+            self.assertIn(source_path.resolve().as_uri()+'#task-t1', page)
+            self.assertIn('href="'+evidence[0]['permalink']+'"', page)
+            with self.assertRaises(ValueError):
+                check_copy_page(page.replace('#task-t1', '#task-t2'), md, report.parent)
+            with self.assertRaises(ValueError):
+                check_copy_page(page.replace('<p>保存を確認。</p>', '<p>変更</p>'), md, report.parent)
+
+    def test_copy_page_escapes_log_text(self):
+        with tempfile.TemporaryDirectory() as temp:
+            md = '# Report\n\n</script><script>alert(1)</script>\n'
+            document = copy_page(md, Path(temp))
+            self.assertNotIn('</script><script>alert(1)', document)
+            self.assertIn('&lt;/script&gt;', document)
+            check_copy_page(document, md, Path(temp))
+
     def test_source_links_required_and_resolvable(self):
         with tempfile.TemporaryDirectory() as temp:
             path=Path(temp)/'sources.html'
