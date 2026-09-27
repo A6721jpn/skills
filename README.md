@@ -14,7 +14,7 @@ Codex / Claude Code で使うスキルとフックをまとめたリポジトリ
 | [gemini-polish](./gemini-polish) | Claude Code / Codex の日本語応答と .md/.txt 出力を Gemini (agy) で推敲するフック一式を導入・更新・削除します。 | gemini-polish を入れたい／直したい／外したいときに使用します。`SKILL.md` と、先頭に `gemini-polish: skip` を持つ生成物は推敲しません。 |
 | [html-report-pipeline](./html-report-pipeline) | 出典付きの根拠、最小限の図、検証済みマークアップを備えた単一ファイルのHTMLレポートを作成・改訂します。 | 成果物が1つのHTMLレポートファイルのときに使用します。MarkdownやChat回答には使いません。同じskillsディレクトリに technical-report-authoring / pink-elephant-guard / sanitize-artifacts / html が必要です（無い段階は省略して未検証と報告します）。 |
 | [japanese-tech-writing](./japanese-tech-writing) | 日本語の技術文書・書籍原稿について、構成、論証の厳密さ、用語、視点、読み手の負荷、冗長さを整える文章規範です。 | 日本語で技術書の章、記事、解説文を書くときや、既存原稿を推敲・リライトするときに使用します。 |
-| [jp-llm-lint](./jp-llm-lint) | Codex の日本語回答を、Tailscale 内の JP-LLM-LINT サービス（service-host）に送って読み手向けに再構成します。クライアント用のエントリーポイントだけを含みます。 | `$jp-llm-lint` で明示起動、または日本語の回答を読みやすくしたいときに使用します。サービスが拒否・停止していれば原文のまま返ります。機密を含む本文には使いません。 |
+| [jp-llm-lint](./jp-llm-lint) | Codex の日本語回答を、Tailscale 内の 設定済みのJP-LLM-LINT サービスに送って読み手向けに再構成します。クライアント用のエントリーポイントだけを含みます。 | `$jp-llm-lint` で明示起動、または日本語の回答を読みやすくしたいときに使用します。サービスが拒否・停止していれば原文のまま返ります。機密を含む本文には使いません。 |
 | [maintaining-repo-context-docs](./maintaining-repo-context-docs) | 開発が進んで古くなったエージェント向けドキュメントを監査・更新します。 | そうしたドキュメントが既にあり、古くなったり矛盾したりしているときに使用します。ゼロから作る場合は repo-context-docs を使います。 |
 | [melt-worklog](./melt-worklog) | 両PCのCodex・OrcaとMelt ConnectのSlackから、その日の作業を根拠付きで日報にまとめます。 | Notion貼り付け用HTMLと簡潔なMarkdownを生成し、項目ごとの出典リンクを機械検査します。NotionタスクDBとの同期は未実装です。収集ログや日報実データは含みません。 |
 | [personalized-news-collector](./personalized-news-collector) | 承認済みの関心プロファイルをもとに、最新ニュースをWebで検証し、出典付きの日本語ダイジェストとして整理します。 | ニュース収集時の重複排除と話題の多様性を扱います。Chrome履歴を直接読んだり、プロファイルを自動生成したりはしません。 |
@@ -35,4 +35,14 @@ Codex / Claude Code で使うスキルとフックをまとめたリポジトリ
 - `fusion-upper-frame-annular-0p5` と `fusion-upper-frame-bottom-datum-add` は、特定のプロジェクト（Upper Frame の F3D、SHA-256 固定）専用の再現用コントローラです。汎用スキルではなく、fail-closed な CAD 操作スキルの実装例として公開しています。
 - Windows で `personalized-news-collector` や `fusion-*` のテスト・実行が `FileNotFoundError` / `WinError 206` で失敗する場合は、パス長が 260 文字を超えています。長いパスを有効化（`LongPathsEnabled`）するか、リポジトリやデータルートを短いパス（例: `C:\skills`）に置いてください。
 
-更新日: 2026-09-24
+## 公開前の確認
+
+PC名、個人名、実環境の絶対パス、内部接続先を公開ファイルに書かず、各スキルの非公開設定や環境変数へ分離します。人物を示す例は「Aさん」などにします。日報・収集ログ・非公開設定はGit管理外です。
+
+`python scripts/check_public_content.py --worktree` で編集内容、`--staged` でコミット対象を検査します。`git config core.hooksPath .githooks` でコミット前の検査を有効化できます。GitHub Actionsでも同じ汎用検査を実行します。
+
+実名などの追加禁止語は、公開リポジトリ外の `$CODEX_HOME/private/public-skills-denylist.json`（未設定時は `~/.codex/private/public-skills-denylist.json`）に文字列の配列として保存します。`SKILLS_PRIVACY_DENYLIST` または `--denylist` で場所を変更できます。禁止語自体を公開テストや設定へ書き込まないでください。CIではこのローカル禁止語を利用できないため、公開前に手元でも検査します。
+
+検査は固有情報の再混入を減らす補助であり、すべての機密情報を検出するものではありません。過去履歴の確認には `--history --ref main` を使います。ファイルの修正だけでは過去コミットやGitHubの旧PR参照は削除されません。
+
+更新日: 2026-09-27

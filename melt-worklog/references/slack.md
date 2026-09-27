@@ -23,5 +23,5 @@ historyは `{"query":"history:C_CHANNEL","result":{"messages":[実際の配列]}
 Melt Connectが不調なときは次の診断結果をユーザーへ示す。アップデートの案内があれば `update` の実行を案内する。別のAPI経路に切り替えない。
 
 ```powershell
-& 'python' '<user-home>/.melt-connect/melt_connect.py' doctor
+python (Join-Path $env:USERPROFILE ".melt-connect/melt_connect.py") doctor
 ```

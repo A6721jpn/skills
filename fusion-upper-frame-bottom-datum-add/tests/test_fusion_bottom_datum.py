@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import os
 import hashlib
 import shutil
 import unittest
@@ -21,10 +22,7 @@ SPEC.loader.exec_module(MODULE)
 PROFILE_PATH, PROFILE = MODULE.load_profile(
     SKILL_ROOT / "assets" / "upper-frame-bottom-datum-v1-profile.json"
 )
-HISTORICAL_ROOT = Path(
-    "private-history/"
-    "upper-frame-fusion-development"
-)
+HISTORICAL_ROOT = Path(os.environ.get("FUSION_HISTORY_ROOT", "private-history"))
 TEST_TASK_ID = "fusion-recipe-test"
 TEST_THREAD_ID = "00000000-0000-0000-0000-000000000001"
 

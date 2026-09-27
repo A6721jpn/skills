@@ -8,7 +8,8 @@
   python rewrite.py --force < draft.txt      # 強制モード：Guard の意味検査で不合格でも書き直しを返す（ユーザーの明示指示があるときだけ）
 
 環境変数:
-  JPLLMLINT_URL      既定 http://localhost:8765（Tailscale MagicDNS。IP 指定も可）
+  JPLLMLINT_URL      接続先URL（非公開設定の url より優先）
+  JPLLMLINT_CONFIG   非公開設定JSON。既定 CODEX_HOME/private/jp-llm-lint.json
   JPLLMLINT_TIMEOUT  生成待ちの秒数。既定 180
   JPLLMLINT_PROBE    接続確認（/health）の秒数。既定 3。経路が黙って落ちていても数秒でフォールバックする
 
@@ -20,15 +21,37 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from pathlib import Path
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
-DEFAULT_URL = "http://localhost:8765"  # Tailscale MagicDNS 名。IP で指定するなら JPLLMLINT_URL=http://127.0.0.1:8765
+def service_url() -> str:
+    if "JPLLMLINT_URL" in os.environ:
+        value = os.environ["JPLLMLINT_URL"]
+    else:
+        codex_home = Path(os.environ["CODEX_HOME"]) if os.environ.get("CODEX_HOME") else Path.home() / ".codex"
+        path = Path(os.environ.get("JPLLMLINT_CONFIG", str(codex_home / "private/jp-llm-lint.json"))).expanduser()
+        try:
+            config = json.loads(path.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError) as exc:
+            raise ValueError("Service URL is not configured in private settings") from exc
+        if not isinstance(config, dict):
+            raise ValueError("Private settings must be a JSON object")
+        value = config.get("url")
+    if not isinstance(value, str):
+        raise ValueError("Service URL must be a string")
+    parsed = urllib.parse.urlsplit(value)
+    if (parsed.scheme not in ("http", "https") or not parsed.hostname
+            or parsed.username or parsed.password or parsed.query or parsed.fragment
+            or any(ch.isspace() for ch in value)):
+        raise ValueError("Invalid service URL")
+    return value.rstrip("/")
 
 
 def call(path: str, payload: dict | None, timeout: float) -> dict:
-    base = os.environ.get("JPLLMLINT_URL", DEFAULT_URL).rstrip("/")
+    base = service_url()
     data = json.dumps(payload, ensure_ascii=False).encode("utf-8") if payload is not None else None
     req = urllib.request.Request(base + path, data=data, method="POST" if data else "GET",
                                  headers={"Content-Type": "application/json; charset=utf-8"})

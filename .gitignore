@@ -3,3 +3,19 @@ __pycache__/
 .pytest_cache/
 .test-work/
 work/.skill-tests/
+
+# Private machine configuration and generated worklog evidence
+/private/
+/work/
+/outputs/
+*.local.json
+.env
+.env.*
+**/evidence.jsonl
+**/sessions.json
+**/*-evidence.json
+**/*-tasks.json
+**/*-sources.html
+**/*-source-check.json
+**/*-Notion貼付用.html
+**/*-日報.md

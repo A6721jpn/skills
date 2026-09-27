@@ -66,3 +66,5 @@ ledger means only that all historical replay gates passed.
 Use `audit-history` to recheck the two preserved result JSON files and the
 Bottom F3D/STEP hashes without opening Fusion. This confirms the extracted
 historical evidence, not a newly staged run.
+
+Historical evidence paths in the public profile are relative. Set `FUSION_HISTORY_ROOT` locally to the private evidence directory before `audit-history` or the historical-fixture tests. Do not commit the environment setting, historical logs, or CAD archives. The pinned geometry checks and hashes remain unchanged.

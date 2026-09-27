@@ -49,7 +49,7 @@ description: Use when the user invokes $jp-llm-lint, or asks to polish / rewrite
 python "$CODEX_HOME/skills/jp-llm-lint/scripts/rewrite.py" --health
 ```
 
-`{"model": ..., "adapter": ..., "guard_mode": ...}` が返れば稼働中。接続先は環境変数 `JPLLMLINT_URL`（既定 `http://localhost:8765`。MagicDNS が使えない場合は `http://127.0.0.1:8765`）。応答には 1000 字あたり 35〜40 秒かかる。
+`{"model": ..., "adapter": ..., "guard_mode": ...}` が返れば稼働中。接続先は環境変数 `JPLLMLINT_URL`、または非公開JSONの `url` で指定する。設定ファイルは `$CODEX_HOME/private/jp-llm-lint.json`（CODEX_HOME未設定時は `~/.codex/private/jp-llm-lint.json`）。`JPLLMLINT_CONFIG` で場所を変更できる。環境変数のURLが優先され、未設定・不正な設定では原文へ戻る。実際のホスト名・IPをSkillへ保存しない。応答には 1000 字あたり 35〜40 秒かかる。
 
 ## 注意
 

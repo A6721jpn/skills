@@ -56,3 +56,5 @@ release-ready** while these blockers remain:
 
 Use `audit-history` to hash-check and revalidate preserved historical evidence
 without opening Fusion. It does not prove that a newly staged run succeeded.
+
+Historical evidence paths in the public profile are relative. Set `FUSION_HISTORY_ROOT` locally to the private evidence directory before `audit-history` or the historical-fixture tests. Do not commit the environment setting, historical logs, or CAD archives. The pinned geometry checks and hashes remain unchanged.

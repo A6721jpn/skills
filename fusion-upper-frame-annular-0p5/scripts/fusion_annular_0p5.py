@@ -1549,6 +1549,21 @@ def record_result(
     return check, EXIT_OK if check["success"] else EXIT_VALIDATION
 
 
+def historical_path(value: str) -> Path:
+    """Resolve private evidence without publishing the workstation's directory."""
+    path = Path(value)
+    if path.is_absolute():
+        return path.resolve()  # Existing private profiles remain compatible.
+    root = os.environ.get("FUSION_HISTORY_ROOT")
+    if not root:
+        raise CliFailure("Set FUSION_HISTORY_ROOT to the private historical evidence directory")
+    base = Path(root).expanduser().resolve()
+    resolved = (base / path).resolve()
+    if not resolved.is_relative_to(base):
+        raise CliFailure("Historical evidence path escapes FUSION_HISTORY_ROOT")
+    return resolved
+
+
 def audit_history(
     profile_path: Path,
     profile: dict[str, Any],
@@ -1557,7 +1572,7 @@ def audit_history(
     reports = []
     overall = True
     for step_id, evidence in (recipe.get("historical_evidence") or {}).items():
-        path = Path(str(evidence["path"])).resolve()
+        path = historical_path(str(evidence["path"]))
         expected_hash = str(evidence["sha256"]).upper()
         if not path.is_file():
             report = {

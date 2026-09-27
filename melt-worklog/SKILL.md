@@ -1,6 +1,6 @@
 ---
 name: melt-worklog
-description: local-workstationとremote-workstationのCodex・Orca作業ログ、およびMelt ConnectのSlackから、指定日の作業を根拠付きで集約し日報を作成する。「今日何をしたか」「日報」「作業記録」の生成・再集計に使う。
+description: ローカルと設定済みリモートPCのCodex・Orca作業ログ、およびMelt ConnectのSlackから、指定日の作業を根拠付きで集約し日報を作成する。「今日何をしたか」「日報」「作業記録」の生成・再集計に使う。
 ---
 
 # Melt 作業日報
@@ -10,12 +10,14 @@ description: local-workstationとremote-workstationのCodex・Orca作業ログ�
 ## 実行
 
 日付はAsia/Tokyo。当日指定なら現在の日付を使う。「昨日」は日本時間で計算する。複数日は1日ずつ処理する。
-既定はこのPCのCodexとSSH alias `remote-workstation` のCodex・Orca。Python 3.10以上とSSHが必要。local-workstationには `python`、remote-workstationには `python` がある。パスが変わった場合は検出し直す。
+Python 3.10以上と、リモート収集にはSSHが必要。利用できる `python` または `py -3` を確認する。実際のPC名・Pythonの絶対パスをSkillへ書き込まない。
+接続先はSkillの外にある `$CODEX_HOME/private/melt-worklog.json`（CODEX_HOME未設定時は `~/.codex/private/melt-worklog.json`）から読む。形式は `{"remote":"workstation","remote_python":"python"}`。`workstation` は説明用の名前であり、実際のSSH aliasは非公開設定だけに保存する。`MELT_WORKLOG_CONFIG` または `--config` で設定ファイルを指定でき、`--remote` と `--remote-python` は設定値を上書きする。
+未設定ならローカルだけを収集し、その制約を記録する。両PCの日報を求められた場合は設定済みリモートの取得状態も確認する。非公開設定と生成ログ・日報は公開リポジトリに追加しない。
 
 1. このSkillのディレクトリを基準に `scripts/collect.py` を実行する。新しい実行用ディレクトリを `work/worklog/<日付>/<実行ID>/` に作り `--out` に渡す。
 
    ```powershell
-   & 'python' '<Skillの絶対パス>/scripts/collect.py' --date YYYY-MM-DD --out '<作業用ディレクトリ>' --remote remote-workstation --exclude-session '<この日報生成タスクのID>'
+   python '<Skill>/scripts/collect.py' --date YYYY-MM-DD --out '<作業用ディレクトリ>' --exclude-session '<この日報生成タスクのID>'
    ```
 
    このタスク自身を除外して、前の日報に引用した他の仕事を再収集する循環を避ける。ID不明ならコマンドからその引数を省き、集約時に日報生成セッションを除外する。この仕組み自体の開発は依頼があれば通常の仕事として別記する。
@@ -35,7 +37,7 @@ description: local-workstationとremote-workstationのCodex・Orca作業ログ�
    & '<Python>' '<Skill>/scripts/report.py' inspect --bundle '<作業用ディレクトリ>' --session '<ID>' --kind user --kind assistant_final --kind task_complete --limit 30
    ```
 
-   `--kind assistant` はClaude等の回答、`--kind tool_result` は実行結果。`--offset` で続きを読む。`--source slack` でSlackを確認できる。切り詰めが結論に影響するときは `origins` のパス・行／DBキーから必要な部分を読み直す。リモートのパスはremote-workstation上で読む。
+   `--kind assistant` はClaude等の回答、`--kind tool_result` は実行結果。`--offset` で続きを読む。`--source slack` でSlackを確認できる。切り詰めが結論に影響するときは `origins` のパス・行／DBキーから必要な部分を読み直す。リモートのパスは根拠に記録された元のホスト上で読む。
 
 4. [タスク判定とJSON形式](references/tasks.md) に従い `tasks.json` を作る。日報に書く各項目へ `evidence_ids` を付ける。
    本文は簡潔にする。通常は1項目1〜2文、結論と成果・重要な残件だけを記す。「報告を確認した」などの反復説明、根拠IDの列挙、本文と重複する次の対応は省く。根拠と詳細はJSONに保持する。今回の17項目程度なら本文約2,000字を目安とし、項目数に応じて調整する。

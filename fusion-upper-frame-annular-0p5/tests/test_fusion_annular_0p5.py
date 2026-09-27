@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import os
 import hashlib
 import shutil
 import unittest
@@ -21,10 +22,7 @@ PROFILE_PATH, PROFILE = MODULE.load_profile(
     SKILL_ROOT / "assets" / "upper-frame-v1-annular-0p5-profile.json"
 )
 RECIPE = PROFILE["recipes"]["annular-0p5"]
-HISTORICAL_ROOT = Path(
-    "private-history/"
-    "upper-frame-fusion-development"
-)
+HISTORICAL_ROOT = Path(os.environ.get("FUSION_HISTORY_ROOT", "private-history"))
 ACCEPTED_ARCHIVE = (
     HISTORICAL_ROOT
     / "artifacts"

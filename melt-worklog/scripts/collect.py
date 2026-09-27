@@ -17,6 +17,26 @@ JST = dt.timezone(dt.timedelta(hours=9))
 UTC = dt.timezone.utc
 
 
+def load_settings(config_path=None):
+    """Read machine-specific settings outside the distributable skill directory."""
+    supplied = config_path or os.environ.get("MELT_WORKLOG_CONFIG")
+    if supplied:
+        path = Path(supplied).expanduser()
+    else:
+        codex_home = Path(os.environ["CODEX_HOME"]) if os.environ.get("CODEX_HOME") else Path.home() / ".codex"
+        path = codex_home / "private/melt-worklog.json"
+    if not path.exists() and not supplied:
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as exc:
+        raise ValueError("Cannot read worklog configuration; check the private settings file") from exc
+    if (not isinstance(data, dict) or set(data) - {"remote", "remote_python"}
+            or any(not isinstance(value, str) for value in data.values())):
+        raise ValueError("Worklog configuration accepts only string remote and remote_python fields")
+    return data
+
+
 def timestamp(value):
     if value is None:
         return None
@@ -304,18 +324,27 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", default=dt.datetime.now(JST).date().isoformat())
     parser.add_argument("--out", required=True)
-    parser.add_argument("--remote", default="remote-workstation", help="SSH alias; empty string skips remote")
-    parser.add_argument("--remote-python", default="python")
+    parser.add_argument("--config", help="Private settings file; defaults to CODEX_HOME/private/melt-worklog.json")
+    parser.add_argument("--remote", help="Override configured SSH alias; empty string skips remote")
+    parser.add_argument("--remote-python", help="Override configured remote Python command")
     parser.add_argument("--exclude-session", action="append", default=[])
     args = parser.parse_args()
     bounds(args.date)
+    try:
+        settings = load_settings(args.config)
+    except ValueError as exc:
+        parser.error(str(exc))
+    args.remote = settings.get("remote", "") if args.remote is None else args.remote
+    args.remote_python = settings.get("remote_python", "python") if args.remote_python is None else args.remote_python
+    if args.remote and (not re.fullmatch(r"[A-Za-z0-9_.-]+", args.remote) or args.remote.startswith("-")):
+        parser.error("Invalid SSH alias")
+    if args.remote and not re.fullmatch(r"[A-Za-z0-9_./:-]+", args.remote_python):
+        parser.error("Use a Python command/path without spaces")
     results = [host_collect(args.date, include_orca=False, exclude_sessions=args.exclude_session)]
+    if not args.remote:
+        results[0]["coverage"]["limitations"].append("Remote collection is disabled or not configured; only local Codex logs were collected.")
     if args.remote:
         # stdin carries code, not a remote file or shell-generated command; never modifies source logs.
-        if not re.fullmatch(r"[A-Za-z0-9_.-]+", args.remote) or args.remote.startswith("-"):
-            parser.error("Invalid SSH alias")
-        if not re.fullmatch(r"[A-Za-z0-9_./:-]+", args.remote_python):
-            parser.error("Use a Python command/path without spaces")
         src = Path(__file__).read_text(encoding="utf-8").split('\nif __name__ == "__main__":')[0]
         src += "\nprint(json.dumps(host_collect("+repr(args.date)+", True, "+repr(args.exclude_session)+"), ensure_ascii=True))\n"
         try:
