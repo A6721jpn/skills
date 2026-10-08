@@ -6,63 +6,90 @@ description: >-
   UI direction; not for general GUI work.
 license: "Apache-2.0; see LICENSE.txt"
 metadata:
-  version: "1.2.0"
+  version: "2.1.2"
+  optimized_for: "gpt-6-astra"
 ---
 
-# Rams-informed GUI design
+# Rams GUI Design
 
-Treat this as a functional design discipline, not a retro skin: a precise, calm instrument whose form follows the user's work. Do not imitate Braun products literally. Scale the effort to the task; a local styling fix needs none of the references below.
+Create a precise, calm working instrument whose structure explains its use.
+The user's brief and existing product commitments take precedence over these
+design preferences, including accessibility and platform requirements.
 
-## Precedence
+## Design judgment
 
-1. Required behavior, data integrity, safety, platform conventions.
-2. Accessibility, localization, responsiveness, performance.
-3. The repository's existing components and tokens.
-4. The Rams-informed rules in this skill.
-5. Remaining aesthetic preference.
+- **Derive form from work.** Organize the screen around the object being worked
+  on, the decision being made, and the relationship between control and result.
+  Let those relationships determine the composition before choosing a visual style.
+- **Spend attention deliberately.** Give the current work and consequential
+  exceptions priority. Let surrounding chrome recede. Express hierarchy through
+  position, alignment, density, and typography; color and depth can reinforce it.
+- **Make the instrument honest.** Keep values, units, editable boundaries, and
+  decision-relevant state understandable. A precise-looking display must distinguish
+  actual precision, uncertainty, and pending changes. Preserve context and recovery
+  when an operation fails.
+- **Reduce the user's burden.** Prefer the design that removes interpretation,
+  navigation, or repeated effort while retaining useful context. Fewer visible
+  elements are beneficial only when they improve the actual job.
 
-An explicit user brief overrides the default visual language. Discipline a product's brand; do not erase it.
+Resolve visual and interaction tradeoffs from these criteria. Geometry, motion,
+density, and component choice are design decisions for this product.
+Rams character comes from functional coherence and restrained craftsmanship.
 
-## Design contract
+## Color set — A
 
-- Start from use: primary user, primary job, critical information, highest-risk action.
-- Let grouping, hierarchy, and control-to-result mapping explain the interface.
-- Use the fewest sufficient elements; neutral surfaces, one functional accent, little permanent elevation.
-- Show actual state, latency, limits, permissions, and uncertainty. Never imply capability the system lacks.
-- Derive spacing, size, radius, color, type, and motion from tokens, not scattered values.
-- Resolve every state the product can enter, including recovery.
-- Choose components for interaction semantics, never because they look characteristic.
-- Ask only when a missing answer would change behavior, safety, information architecture, or platform choice; use this skill's defaults for reversible visual choices and proceed.
+Use this light-theme palette unless the user's brief or an established product
+color system takes precedence. Keep orange as the primary accent for actions,
+selection signals, and focus; give status colors their listed roles.
 
-## References
-
-Read only the row that changes the current decision.
-
-| When you need to | Read |
+| Role | Color |
 |---|---|
-| Interpret the philosophy or judge a Rams-specific exception | [references/rams-principles.md](references/rams-principles.md) |
-| Choose or change information architecture, layout, or a workflow | [references/feature-archetypes.md](references/feature-archetypes.md) |
-| Choose or refine controls, data displays, feedback, or component states | [references/component-patterns.md](references/component-patterns.md) |
-| Establish or change tokens, type, color, geometry, elevation, icons, charts, motion | [references/visual-language.md](references/visual-language.md) |
-| Implement or verify accessibility, responsiveness, rendering, performance | [references/accessibility-and-verification.md](references/accessibility-and-verification.md) |
-| Run an explicit audit or a formal reduction pass | [references/quality-gates.md](references/quality-gates.md) |
+| Canvas | #EFEDE7 |
+| Surface | #F9F8F3 |
+| Main text | #1F211F |
+| Secondary text | #62645E |
+| Decorative divider | #C7C7BF |
+| Control boundary | #83877E |
+| Primary accent / focus | #AE4700 |
+| Text on accent | #FFFFFF |
+| Selection background | #F6E6D9 |
+| Error | #A32958 |
+| Error background | #FBE6EE |
+| Warning signal | #E7BC26 |
+| Warning background | #FFF5CC |
+| Warning text | #5B4900 |
+| Success | #2E6E4A |
+| Information | #355F7C |
 
-When no design system exists, adapt [assets/rams-ui-tokens.json](assets/rams-ui-tokens.json); [assets/rams-ui-foundation.css](assets/rams-ui-foundation.css) is a web starting point, not a required stylesheet.
+Pair the yellow warning signal with its dark text color. Pair status colors with
+text or symbols so the meaning remains visible beyond color.
 
-## Audit script
+## Typography
 
-For a heuristic source pass, run from the project root:
+Use IBM Plex Sans JP for Japanese and Latin GUI text unless the user's brief or
+an established product type system takes precedence. Use Regular (400) for body
+text and Bold (700) for emphasis; choose sizes, line height, and density for the
+actual task. When implementing or changing typography, read
+[typography.md](references/typography.md) for verified download sources, local
+bundling, and font-load verification.
 
-```bash
-python "<this skill's directory>/scripts/rams_ui_audit.py" <changed-ui-paths>
-```
+## Context to load when useful
 
-Every result is a warning to judge in context, not proof of quality or accessibility.
+| Current task | Supporting guidance |
+|---|---|
+| Establish a new interface or substantially new composition | [new-interface.md](references/new-interface.md) |
+| Change or review an existing interface | [existing-interface.md](references/existing-interface.md) |
+| Implement or change typography | [typography.md](references/typography.md) |
 
-## Done means
+A bounded local correction can use the criteria above without loading a reference.
+For mixed tasks, read the relevant section where its decision becomes necessary.
 
-For a substantial UI task: the primary job is immediately legible; component choice matches the interaction; relevant states and recovery paths exist; existing tokens and conventions are respected; no applicable hard fail from `quality-gates.md` remains; a reduction pass was run; and the handoff separates what was verified from what was not. Do not claim visual completion for rendering you did not inspect.
+## Completion
 
-## Provenance
+For implementation, carry the authorized scope through a usable result, rendered
+inspection where available, and correction of observed defects. Finish when the
+requested job works and the affected requirements have sufficient evidence;
+choose checks proportionate to the change. Report material evidence gaps.
+For reviews, deliver findings supported by the affected interface and user task.
 
-Derived from Anthropic's `frontend-design` skill (Apache-2.0). See `NOTICE.md`.
+See [NOTICE.md](NOTICE.md) for attribution and instruction-design sources.
